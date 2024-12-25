@@ -6,14 +6,14 @@ IP=$(curl -s ifconfig.me)
 #1.2 If the applications are already installed, don’t install them again. 
 function InstallApplications()
 {
-	applications=("curl" "ssh" "sshpass", "nmap", "whois", "geoip-bin")
+	applications=("curl" "openssh-server" "sshpass" "nmap" "whois" "geoip-bin")
 
 	for app in "${applications[@]}"; do
 		if command -v "$app" &> /dev/null; then
 			echo "$app is already installed."
 		else
 			echo "$app is not installed. Installing now..."
-			sudo apt install -y "$app"
+			sudo apt install "$app" -y 
 		fi
 	done
 }
@@ -37,7 +37,7 @@ function RemoteAccess()
 	read -p "=> Enter username: " USERNAME
 	read -p "=> Enter remote IP: " REMOTEIP
 	read -p "=> Enter password: " PASSWORD
-	sshpass -p "$PASSWORD" ssh $USERNAME@$REMOTEIP
+	sshpass -p "$PASSWORD" ssh $USERNAME@$REMOTEIP 'ls; whoami'
 }
 
 #1.5 Allow the user to specify the address to scan via remote server; save into a variable. 
@@ -52,7 +52,8 @@ function Scan()
 	scan_ip=$(dig +short $DMN)
 	country=$(geoiplookup $DMN | awk '{print $5}')
 	whois $DMN >> nr.log
-	nmap -F $DMN >> nr.log
+	nmap -Pn -F $DMN >> nr.log
+	cat nr.log
 }
 
 #3.1 Save the Whois and Nmap data into files on the local computer. 
